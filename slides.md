@@ -17,9 +17,7 @@ transition: slide-left
 css: unocss
 title: MAL
 ---
-
-# MAL
-### Meta Attack Language
+# Prova
 
 <div class="pt-12">
   <span @click="$slidev.nav.next" class="px-2 py-1 rounded cursor-pointer" hover="bg-white bg-opacity-10">
@@ -32,7 +30,12 @@ title: MAL
     <carbon:edit />
   </button>
 </div>
+---
+layout: section
+---
 
+# MAL
+### Meta Attack Language
 
 ---
 
@@ -63,8 +66,10 @@ layout: two-cols
 # Formalism for Threat Modeling
 
 <style>
-  .slidev-layout {
-    @apply text-2.3 opacity-75;
+  .slidev-layout{ 
+    p, li{
+      @apply text-2.3 opacity-75;
+    }
   }
 </style>
 
@@ -119,8 +124,10 @@ layout: two-cols
 # Formalism for Threat Modeling (cont.)
 
 <style>
-  .slidev-layout {
-    @apply text-2.3 opacity-75;
+  .slidev-layout{ 
+    p, li{
+      @apply text-2.3 opacity-75;
+    }
   }
 </style>
 
@@ -168,5 +175,29 @@ Un attaccante esperto, invece, sceglie sempre il **percorso minimo** per raggiun
 
 ---
 
+<style>
+  .slidev-layout p{
+    @apply text-3 leading-4;
+  }
+</style>
+
 # Il Meta Attack Language
 
+Il modello matematico sopra descritto potrebbe essere codificato con un linguaggio di programmazione, come ad esempio Java, ma è molto più semplice utilizzare un linguaggio di alto livello, come il Meta Attack Language (MAL).
+
+Gli autori hanno realizzato un compilatore che, a partire da una descrizione del modello in MAL, genera del codice in Java, che può essere utilizzato per calcolare il tempo globale per compromettere il sistema.
+
+## Classi
+
+Come specificato sopra, le classi sono le entità fondamentali di una specifica MAL. Una classe è definita come segue:
+
+```java
+class Channel{
+  | transmit
+    -> parties.connect
+}
+```
+
+Il simbolo | indica che lo step di attacco è di tipo OR; per cui, se almeno uno degli step di attacco genitori è stato completato, allora lo step di attacco può essere iniziato.
+
+Step di attacco di tipo AND sono indicati con il simbolo &. 

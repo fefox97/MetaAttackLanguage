@@ -8,13 +8,21 @@
     -moz-text-fill-color: transparent;
 } */
 
+.slidev-layout{ 
+    p, li {
+        @apply text-4 leading-5;
+    }
+}
 .footnotes-sep {
-    @apply mt-20 opacity-10;
+    @apply mt-30 opacity-10;
 }
 .footnotes {
-    @apply text-2.5 opacity-75;
+    p, li{
+        @apply text-2.5 opacity-75;
+    }
 }
 
 /* .footnote-backref {
     display: none;
 } */
+
