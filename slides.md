@@ -16,8 +16,9 @@ drawings:
 transition: slide-left
 css: unocss
 title: MAL
+canvasWidth: 1100
 ---
-# Prova
+# Pitch
 
 <div class="pt-12">
   <span @click="$slidev.nav.next" class="px-2 py-1 rounded cursor-pointer" hover="bg-white bg-opacity-10">
@@ -61,17 +62,19 @@ layout: section
 Questi linguaggi permettono di modellare le proprietà di sicurezza di un sistema, ma non sono in grado di fornire alcuno strumento automatico per analizzare o inferire conclusioni sulla sicurezza del modello stesso.
 
 ---
-layout: two-cols
+layout: two-cols-header
 ---
 # Formalism for Threat Modeling
 
 <style>
   .slidev-layout{ 
     p, li{
-      @apply text-2.3 opacity-75;
+      @apply text-2.7 opacity-75;
     }
   }
 </style>
+
+::left::
 
 - Sia $x$ un'**entità del dominio**, ad esempio, un'entità potrebbe essere un diamante $cullinanDiamond$, un'altra una cassaforte $antwerpVault$.
 - Gli oggetti sono divisi in un set di **classi** $X=\{X_1, ..., X_n\}$, e.g.
@@ -119,17 +122,19 @@ $$
 $$
 sta a significare che se si riesce ad aprire la cassaforte, si possono rubare i diamanti contenuti.
 ---
-layout: two-cols
+layout: two-cols-header
 ---
 # Formalism for Threat Modeling (cont.)
 
 <style>
   .slidev-layout{ 
     p, li{
-      @apply text-2.3 opacity-75;
+      @apply text-2.6 opacity-75;
     }
   }
 </style>
+
+::left::
 
 - Una classe obbligatoria è il singleton **Attacker**, $\Xi \in X$, contenente un singolo step di attacco $\Xi.\xi$, il quale rappresenta il punto di partenza dell'attacco sul modello del sistema.
 - Per ciascuno step di attacco $A(X_i)$, è definito un **tempo di attacco locale** (stimato) $\phi(A) = P(T_{loc}(A)=t)$.
@@ -187,6 +192,9 @@ Il modello matematico sopra descritto potrebbe essere codificato con un linguagg
 
 Gli autori hanno realizzato un compilatore che, a partire da una descrizione del modello in MAL, genera del codice in Java, che può essere utilizzato per calcolare il tempo globale per compromettere il sistema.
 
+---
+
+# Il Meta Attack Language
 ## Classi
 
 Come specificato sopra, le classi sono le entità fondamentali di una specifica MAL. Una classe è definita come segue:
@@ -198,6 +206,93 @@ class Channel{
 }
 ```
 
-Il simbolo | indica che lo step di attacco è di tipo OR; per cui, se almeno uno degli step di attacco genitori è stato completato, allora lo step di attacco può essere iniziato.
+Il simbolo `|` indica che lo step di attacco è di tipo OR; per cui, se almeno uno degli step di attacco genitori è stato completato, allora lo step di attacco può essere iniziato.
 
-Step di attacco di tipo AND sono indicati con il simbolo &. 
+Step di attacco di tipo AND sono indicati con il simbolo `&`, mentre le difese sono indicate con il simbolo `#`.
+
+La freccia `->` indica che la compromissione dello step di attacco `transmit` apre allo step di attacco `parties.connect`.
+
+---
+
+# Il Meta Attack Language
+## Ruoli di associazione
+
+`parties` è un ruolo di associazione, definito in un altro punto della specifica MAL.
+
+```java
+associations {
+  Machine [parties] 2-* <-- Communication --> * [channels] Channel
+}
+```
+
+Come per l'UML, le associazioni terminano con una cardinalità, che indica il numero di istanze di una classe che possono essere associate ad un'altra classe. Nell'esempio, un oggetto della classe `Channel` deve essere associato ad almeno 2 istanze della classe `Machine`.
+
+Entrambi gli estremi dell'associazione hanno dei ruoli, che sono utilizzati per la navigazione. Per cui, `myChannel.parties` si riferisce al set di oggetti della classe `Machine` associati a `myChannel`.
+
+---
+
+# Il Meta Attack Language
+## Ereditarietà
+
+Per permettere il riuso delle classi, MAL fornisce un meccanismo di ereditarietà, che è simile a quello dei linguaggi di programmazione orientati agli oggetti.
+
+```java
+abstractClass Machine { 
+  | connect
+    -> compromise 
+  & compromise
+    -> channels.transmit
+}
+class Hardware extends Machine { 
+
+}
+class Software extends Machine {
+  & compromise
+  -> channels.transmit, 
+     executors.connect,
+}
+```
+
+Nell'esempio, la classe `Machine` è astratta, e non può essere istanziata. Essa viene specializzata nelle classi concrete `Hardware` e `Software`. In particolare, la classe `Software` eredita tutti gli step di attacco e le associazioni. Inoltre, la classe `Software` effettua l'override dello step di attacco `compromise`, aggiungendo un nuovo step di attacco figlio, `executors.connect`.
+
+---
+
+# Il Meta Attack Language
+## Tempo di compromissione
+
+Alcuni step di attacco possono essere completati senza nessuno sforzo da parte dell'attaccante. Tuttavia, per altri step di attacco, l'attaccante deve effettuare un certo numero di tentativi prima di riuscire. Questo implica del tempo necessario per completare lo step di attacco. Ad esempio, per crackare una password con un attacco a dizionario, potrebbero essere necessarie 18 ore. Per questo motivo, MAL fornisce un meccanismo per specificare il tempo necessario per completare uno step di attacco.
+
+```java
+class Credentials {
+  & dictionaryCrack [18.0]
+}
+```
+
+Certe volte, però, non siamo a conoscenza del tempo esatto necessario per completare uno step di attacco. In questo caso, possiamo far uso di distribuzioni di probabilità.
+
+```java
+class Credentials {
+  & dictionaryCrack [GammaDistribution(1.5, 15)]
+}
+```
+
+---
+
+# Il Meta Attack Language
+## Difese
+
+Abbiamo visto che le classi possono prevedere delle difese, che rappresentano le azioni che possono essere intraprese per prevenire l'attacco. Tecnicamente, ogni difesa include una fase di attacco. Se la difesa è falsa, allora, al momento dell'istanza, il passaggio di attacco associato è contrassegnato come compromesso.
+
+Ad esempio, le credenziali possono essere crittate, e quindi non possono essere compromesse con un attacco a dizionario.
+
+```java {all|5-6}
+class Credentials { 
+  | access
+    -> compromiseUnencrypted 
+  & compromiseUnencrypted
+  # encrypted
+    -> compromiseUnencrypted
+}
+```
+
+Se `Credentials.encrypted` è falso, l'attaccante sarà in grado di raggiungere il passo di attacco `compromiseUnencrypted` non appena ha raggiunto `access`. Se, invece, `Credentials.encrypted` è vero, allora `compromiseUnencrypted` non sarà raggiunto, poiché la sua compromissione richiede quella di entrambi i genitori.

@@ -10,7 +10,8 @@
 
 .slidev-layout{ 
     p, li {
-        @apply text-4 leading-5;
+        @apply text-4;
+        @apply mb-2 mt-3;
     }
 }
 .footnotes-sep {
