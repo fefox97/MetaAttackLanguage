@@ -5,6 +5,9 @@
 :root {
   --prism-font-family: var(--slidev-code-font-family);
   --slidev-code-background: var(--prism-background);
+  --color-info: #26bc94;
+  --color-warning: #ffc932;
+  --color-error: #ee3c3c;
 }
 
 html:not(.dark) {

@@ -13,6 +13,7 @@
     "slidev-theme-smile": "^0.8.1"
   },
   "devDependencies": {
+    "@iconify-json/typcn": "^1.1.4",
     "playwright-chromium": "^1.32.2"
   }
 }
