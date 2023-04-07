@@ -19,6 +19,11 @@
         @apply mt-2 mb-2;
         line-height: 15pt;
     } */
+
+}
+
+.col-left, .col-right{
+    @apply w-105;
 }
 
 .footnotes-sep {
@@ -33,3 +38,12 @@
     display: none;
 } */
 
+.color-info {
+    color: var(--color-info);
+}
+.color-warning {
+    color: var(--color-warning);
+}
+.color-error {
+    color: var(--color-error);
+}
