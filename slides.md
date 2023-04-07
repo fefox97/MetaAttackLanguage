@@ -7,16 +7,13 @@ background: https://source.unsplash.com/collection/4540043/1920x1080
 class: text-center
 highlighter: shiki
 lineNumbers: true
-info: |
-  ## Slidev Starter Template
-  Presentation slides for developers.
-
-  Learn more at [Sli.dev](https://sli.dev)
+info: false
 drawings:
   persist: false
 transition: slide-left
 css: unocss
 title: MAL
+monaco: true
 # canvasWidth: 1920
 
 ---
@@ -29,11 +26,12 @@ title: MAL
   </span>
 </div>
 
-<div class="abs-br m-6 flex gap-2">
+<!-- <div class="abs-br m-6 flex gap-2">
   <button @click="$slidev.nav.openInEditor()" title="Open in Editor" class="text-xl slidev-icon-btn opacity-50 !border-none !hover:text-white">
     <carbon:edit />
   </button>
-</div>
+</div> -->
+
 ---
 layout: section
 ---
@@ -374,5 +372,166 @@ associations {
 
 ---
 
-# Esempio
+# Esempio (cont.)
 
+```java
+abstractClass Machine { 
+  | connect
+    -> compromise 
+  | authenticate
+    -> compromise
+  & compromise
+    -> _machineCompromise
+  | _machineCompromise
+    -> executees.compromise,
+       storedCreds.access,
+       channels.transmit
+}
+```
+
+Considerando gli step di attacco, la classe `Machine` ha due quattro di attacco:
+- `compromise` indica che l'attaccante ha ottenuto il controllo della macchina
+  - Per raggiungere `compromise`, sia `connect` che `authenticate` devono essere compromessi
+- `connect` rappresenta lo stabilimento di una connessione con la `Machine` da parte dell'attaccante
+- `authenticate` rappresenta l'autenticazione dell'attaccante sulla `Machine`, tramite le credenziali
+
+Se `compromise` viene raggiunto, allora tutti i `Software` che sono eseguiti sulla `Machine` saranno compromessi. Inoltre, le credenziali memorizzate sulla `Machine` saranno compromesse, e le connessioni sui `Channel` con altre `Machine` saranno compromesse.
+
+---
+
+# Esempio (cont.)
+
+```java {all}
+class Hardware extends Machine {
+}
+
+class Software extends Machine {
+  & compromise
+    -> _machineCompromise,
+       executors.connect
+}
+```
+
+La specializzazione `Hardware` non ha alcuno step di attacco aggiuntivo. Invece, la specializzazione `Software` ha un solo step di attacco aggiuntivo: se un `Software` viene compromesso, allora anche il `Software` che lo esegue (`executor`) sarà compromesso.
+
+Ad esempio, se un'applicazione viene compromessa, allora anche il sistema operativo che l'esegue sarà compromesso.
+
+---
+
+# Esempio (cont.)
+
+```java
+class Channel {
+  | transmit
+    -> parties.connect
+}
+```
+
+La classe `Channel` ha un solo step di attacco: `transmit`. Se `transmit` viene compromesso, allora tutte le `Machine` coinvolte nella comunicazione (`parties`) saranno compromesse.
+
+---
+
+# Esempio (cont.)
+
+```java {all|11-12}
+class Credentials {
+  | access
+    -> compromiseUnencrypted,
+       dictionaryCrack
+  & compromiseUnencrypted
+    -> compromise
+  | dictionaryCrack [GammaDistribution(1.5, 15)]
+    -> compromise
+  | compromise
+    -> targets.authenticate
+  # encrypted
+    -> compromiseUnencrypted
+}
+```
+
+La classe `Credentials` ha quattro step di attacco. Compromettendo `Machine`, l'attaccante ha accesso alle credenziali. Tuttavia, non è detto che queste siano automaticamente compromesse, poiché potrebbero essere crittate. Infatti, abbiamo qui una *difesa*, `encrypted`.
+
+Infatti
+- Se `encrypted` è vero, allora `compromiseUnencrypted` non sarà raggiunto, poiché la sua compromissione richiede quella di entrambi i genitori.
+- Se `encrypted` è falso $AND$ l'attaccante ha raggiunto lo step di attacco `access`, allora `compromiseUnencrypted` sarà raggiunto, e di conseguenza `compromise`.
+
+---
+
+# Esempio (cont.)
+
+```java {7-8}
+class Credentials {
+  | access
+    -> compromiseUnencrypted,
+       dictionaryCrack
+  & compromiseUnencrypted
+    -> compromise
+  | dictionaryCrack [GammaDistribution(1.5, 15)]
+    -> compromise
+  | compromise
+    -> targets.authenticate
+  # encrypted
+    -> compromiseUnencrypted
+}
+```
+
+Tuttavia, c'è un'altra possibilità: l'attacco a dizionario (`dictionaryCrack`).
+
+Questo attacco richiede che venga speso del *tempo* per essere portato a termine. Tale intervallo richiesto è modello tramite una distribuzione di probabilità, in questo caso una distribuzione *gamma*.
+
+---
+
+# Esempio (cont.)
+
+## Specification diagram
+
+<div class="slidev-layout place-content-center" mt--5>
+  <img src="/Esempio.png" w-180 rd-5>
+</div>
+
+---
+
+# Esempio (cont.)
+
+## Istanziazione
+
+Dalla specifica, possiamo istanziare, in maniera automatica, le classi Java corrispondenti.
+
+```java {all} {maxHeight: '330px'}
+Hardware macBook = new Hardware();
+Software macOS = new Software();
+Software sshClient = new Software();
+Credentials sshKey = new Credentials (encrypted=Bernoulli(0.5));
+
+macOS.addExecutor(macBook);
+sshClient.addExecutor(macOS);
+macOS.addStoredCreds(sshKeys);
+
+Hardware system76 = new Hardware();
+Software ubuntu = new Software();
+Software sshDaemon = new Software();
+
+ubuntu.addExecutor(system76);
+sshDaemon.addExecutor(ubuntu);
+sshKey.addTarget(sshDaemon);
+sshKey.addTarget(ubuntu16);
+
+Channel sshChannel = new Channel();
+sshChannel.addParties(sshClient);
+sshChannel.addParties(sshDaemon);
+
+Attacker attacker = new Attacker();
+attacker.addAttackPoint(macBook.compromise);
+```
+
+<!--
+In questo piccolo esempio, si presume che l'attaccante abbia compromesso il sistema operativo macOS di un macBook, forse accedendo localmente mentre la macchina era incustodita. Un sshClient è in esecuzione sul Mac. La regola MAL `Machine.compromise -> executees.compromise` implica che la compromissione di macOS porta direttamente alla compromissione di sshClient. Inoltre, `Machine.compromise -> `storedCreds.access` porta l'attaccante ad accedere alle chiavi SSH sul Mac.
+
+L'accesso, tuttavia, non è sufficiente, poiché le chiavi SSH possono essere crittografate con una passphrase. La probabilità che le chiavi SSH siano effettivamente crittografate è impostata al 50% nell'istanza dell'oggetto sshKey, `Credentials sshKey = new Credentials (encrypted=Bernoulli(0.5))`; 
+
+Se sshKey non è crittografato, l'accesso sarà effettivamente sufficiente per compromettere le chiavi. In caso contrario, l'attaccante dovrà eseguire un attacco a dizionario sulle chiavi, che richiederà del tempo, come indicato da `dictionaryCrack [GammaDistribution(1.5, 15)]`.
+Compromettendo sshClient, le regole `Machine.compromise -> channels.transmit` e `Channel.transmit -> parties.connect` consente all'attaccante di connettersi a `sshDaemon.connect`, tuttavia, porterà alla compromissione solo se si raggiunge anche `autenticate`.
+Se l'attaccante è riuscito a compromettere la passphrase della chiave SSH, la regola `Credentials.compromise -> target.autenticate` porterà a tale compromissione di sshDaemon. Ciò, a sua volta, consente all'aggressore di connettersi al sistema operativo ubuntu16 sottostante, che viene immediatamente compromesso, poiché le chiavi sono state specificate per fornire l'accesso non solo a sshDaemon ma anche al sistema operativo.
+
+In questo esempio, ci sono solo due distribuzioni stocastiche, la prima che rappresenta la probabilità che la passphrase sia crittografata e la seconda che rappresenta il tempo necessario per decifrare la passphrase nel caso in cui sia effettivamente crittografata. Nessun altro passaggio di attacco in questo esempio dovrebbe richiedere un tempo significativo. Adottando il presupposto di un aggressore perfettamente razionale, possiamo determinare il tempo globale per compromettere, ad esempio, `ubuntu16.compromise` calcolando il percorso più breve dall'attaccante a quella fase di attacco. Nella distribuzione risultante, metà della massa di probabilità sarà localizzata al tempo zero (perché nella metà degli attacchi la passphrase sarà in chiaro, quindi l'accesso sarà immediato), mentre la restante metà sarà distribuita secondo la distribuzione di probabilità del tempo locale al compromesso del `dictionaryCrack`. Questo piccolo modello può essere calcolato manualmente per produrre la distribuzione globale descritta del tempo di compromissione di `ubuntu16.compromise`, ma per modelli più grandi, i calcoli devono essere automatizzati.
+-->
