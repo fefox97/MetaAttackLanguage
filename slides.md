@@ -1,11 +1,12 @@
 ---
 theme: ./theme
+# theme: seriph
 themeConfig:
   primary: '#2A9D8F'
 background: https://source.unsplash.com/collection/4540043/1920x1080
 class: text-center
 highlighter: shiki
-lineNumbers: false
+lineNumbers: true
 info: |
   ## Slidev Starter Template
   Presentation slides for developers.
@@ -16,8 +17,10 @@ drawings:
 transition: slide-left
 css: unocss
 title: MAL
-canvasWidth: 1100
+# canvasWidth: 1920
+
 ---
+
 # Pitch
 
 <div class="pt-12">
@@ -69,7 +72,7 @@ layout: two-cols-header
 <style>
   .slidev-layout{ 
     p, li{
-      @apply text-2.7 opacity-75;
+      @apply text-2.3 opacity-75;
     }
   }
 </style>
@@ -121,15 +124,18 @@ $$
   e = (Vault.open, Vault.contained.steal), e \in E
 $$
 sta a significare che se si riesce ad aprire la cassaforte, si possono rubare i diamanti contenuti.
+
 ---
 layout: two-cols-header
+disabled: false
 ---
+
 # Formalism for Threat Modeling (cont.)
 
 <style>
   .slidev-layout{ 
     p, li{
-      @apply text-2.6 opacity-75;
+      @apply text-2.3 opacity-75;
     }
   }
 </style>
@@ -179,6 +185,8 @@ Ad esempio, un attaccante con scarse capacità di pianificazione potrebbe essere
 Un attaccante esperto, invece, sceglie sempre il **percorso minimo** per raggiungere lo step di attacco successivo.
 
 ---
+layout: center
+---
 
 <style>
   .slidev-layout p{
@@ -206,11 +214,9 @@ class Channel{
 }
 ```
 
-Il simbolo `|` indica che lo step di attacco è di tipo OR; per cui, se almeno uno degli step di attacco genitori è stato completato, allora lo step di attacco può essere iniziato.
-
-Step di attacco di tipo AND sono indicati con il simbolo `&`, mentre le difese sono indicate con il simbolo `#`.
-
-La freccia `->` indica che la compromissione dello step di attacco `transmit` apre allo step di attacco `parties.connect`.
+- Il simbolo `|` indica che lo step di attacco è di tipo OR; per cui, se almeno uno degli step di attacco genitori è stato completato, allora lo step di attacco può essere iniziato.
+- Step di attacco di tipo AND sono indicati con il simbolo `&`, mentre le difese sono indicate con il simbolo `#`.
+- La freccia `->` indica che la compromissione dello step di attacco `transmit` apre allo step di attacco `parties.connect`.
 
 ---
 
@@ -295,4 +301,78 @@ class Credentials {
 }
 ```
 
-Se `Credentials.encrypted` è falso, l'attaccante sarà in grado di raggiungere il passo di attacco `compromiseUnencrypted` non appena ha raggiunto `access`. Se, invece, `Credentials.encrypted` è vero, allora `compromiseUnencrypted` non sarà raggiunto, poiché la sua compromissione richiede quella di entrambi i genitori.
+- Se `Credentials.encrypted` è falso, l'attaccante sarà in grado di raggiungere il passo di attacco `compromiseUnencrypted` non appena ha raggiunto `access`.
+- Se, invece, `Credentials.encrypted` è vero, allora `compromiseUnencrypted` non sarà raggiunto, poiché la sua compromissione richiede quella di entrambi i genitori.
+
+---
+
+<style>
+  .slidev-layout {
+    font-size: 0.8rem !important;
+  }
+</style>
+# Esempio
+
+- Classe [astratta]: `Machine`
+  - Specializzazioni: `Hardware` e `Software`
+    - Le macchine possono eseguire Software, ad esempio una workstation può eseguire un sistema operativo, che a sua volta può eseguire un'applicazione.
+- Due o più macchine possono essere collegate da un `Channel`
+  - Ad esempio, un software per browser web può essere collegato a un software server web tramite un canale https.
+- Classe: `Credentials`
+  - Le istanze possono essere, ad esempio, nomi utente e password o chiavi private.
+  - Le credenziali hanno destinazioni (`Machine`), per le quali fungono da autenticazione e possono essere memorizzate sulle macchine.
+
+```java {all} {maxHeight:'180px'}
+abstractClass Machine { 
+  | connect
+    -> compromise 
+  | authenticate
+    -> compromise
+  & compromise
+    -> _machineCompromise
+  | _machineCompromise
+    -> executees.compromise,
+       storedCreds.access,
+       channels.transmit
+}
+
+class Hardware extends Machine {
+}
+
+class Software extends Machine {
+  & compromise
+    -> _machineCompromise,
+       executors.connect
+}
+
+class Channel {
+  | transmit
+    -> parties.connect
+}
+
+class Credentials {
+  | access
+    -> compromiseUnencrypted,
+       dictionaryCrack
+  & compromiseUnencrypted
+    -> compromise
+  | dictionaryCrack [GammaDistribution(1.5, 15)]
+    -> compromise
+  | compromise
+    -> targets.authenticate
+  # encrypted
+    -> compromiseUnencrypted
+}
+
+associations {
+  Machine [executor] 1 <-- Execution --> * [executees] Software
+  Machine [parties] 2-* <-- Communication --> * [channels] Channel
+  Machine [stores] * <-- Storage --> * [storedCreds] Credentials
+  Machine [targets] * <-- Access --> * [authCreds] Credentials
+}
+```
+
+---
+
+# Esempio
+

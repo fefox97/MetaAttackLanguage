@@ -9,11 +9,18 @@
 } */
 
 .slidev-layout{ 
-    p, li {
-        @apply text-4;
+    p {
+        /* @apply text-4; */
         @apply mb-2 mt-3;
+        line-height: 1.5;
     }
+
+    /* li{
+        @apply mt-2 mb-2;
+        line-height: 15pt;
+    } */
 }
+
 .footnotes-sep {
     @apply mt-30 opacity-10;
 }
@@ -22,7 +29,6 @@
         @apply text-2.5 opacity-75;
     }
 }
-
 /* .footnote-backref {
     display: none;
 } */
