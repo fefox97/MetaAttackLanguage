@@ -9,8 +9,9 @@
 } */
 
 .slidev-layout{ 
+    @apply text-3.3;
+
     p {
-        /* @apply text-4; */
         @apply mb-2 mt-3;
         line-height: 1.5;
     }
@@ -19,7 +20,6 @@
         @apply mt-2 mb-2;
         line-height: 15pt;
     } */
-
 }
 
 .col-left, .col-right{

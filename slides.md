@@ -63,19 +63,9 @@ layout: section
 Questi linguaggi permettono di modellare le proprietà di sicurezza di un sistema, ma non sono in grado di fornire alcuno strumento automatico per analizzare o inferire conclusioni sulla sicurezza del modello stesso.
 
 ---
-layout: two-cols-header
----
+
 # Formalism for Threat Modeling
-
-<style>
-  .slidev-layout{ 
-    p, li{
-      @apply text-2.3 opacity-75;
-    }
-  }
-</style>
-
-::left::
+## Classi e step di attacco
 
 - Sia $x$ un'**entità del dominio**, ad esempio, un'entità potrebbe essere un diamante $cullinanDiamond$, un'altra una cassaforte $antwerpVault$.
 - Gli oggetti sono divisi in un set di **classi** $X=\{X_1, ..., X_n\}$, e.g.
@@ -93,16 +83,27 @@ layout: two-cols-header
 - A ciascuna classe è associato un set di **step di attacco** $A(X_i)$.
   - Denotiamo con $X.A$ lo step di attacco per l'oggetto nella classe $X$.
   - Esempi di step di attacco possono essere $Jewelry.steal$ o $Vault.open$.
-- Un **link** è una tupla di oggetti, ciascuuno appartenente ad una classe diversa, e rappresenta una dipendenza tra gli oggetti, e.g.
+
+---
+
+# Formalism for Threat Modeling
+## Link e associazioni
+
+- Un **link** è una tupla di oggetti, ciascuno appartenente ad una classe diversa, e rappresenta una dipendenza tra gli oggetti, e.g.
   $$
     \lambda = (x_i,x_j)
   $$
-::right::
   - Ad esempio, $antwerpVault$ potrebbe avere un link $containment$ con $cullinanDiamond$, che rappresenta il fatto che la cassaforte può contenere il diamante.
 - I link sono divisi in set di **associazioni** $\Lambda = \{\Lambda_1,...,\Lambda_n\}$, che collega una classe all'altra, e.g.
   $$
     x_i,x_k \in X_m, x_j, x_l \in X_n | \lambda_1=(x_i,x_j) \in \Lambda, \lambda_2=(x_k,x_l) \in \Lambda
   $$
+
+---
+
+# Formalism for Threat Modeling
+## Ruoli e associazioni
+
 - Nelle associazioni, le classi ricoprono dei **ruoli** $\Psi(X_i,\Lambda)$.
   - Ad esempio, $antwerpVault$ potrebbe avere il ruolo $container$ nella relazione $containment$.
   - Analogamente, a livello di istanze, 
@@ -124,21 +125,9 @@ $$
 sta a significare che se si riesce ad aprire la cassaforte, si possono rubare i diamanti contenuti.
 
 ---
-layout: two-cols-header
-disabled: false
----
 
-# Formalism for Threat Modeling (cont.)
-
-<style>
-  .slidev-layout{ 
-    p, li{
-      @apply text-2.3 opacity-75;
-    }
-  }
-</style>
-
-::left::
+# Formalism for Threat Modeling
+## Attacker, tempo di attacco locale
 
 - Una classe obbligatoria è il singleton **Attacker**, $\Xi \in X$, contenente un singolo step di attacco $\Xi.\xi$, il quale rappresenta il punto di partenza dell'attacco sul modello del sistema.
 - Per ciascuno step di attacco $A(X_i)$, è definito un **tempo di attacco locale** (stimato) $\phi(A) = P(T_{loc}(A)=t)$.
@@ -146,23 +135,37 @@ disabled: false
   $$
     \phi(antwerpVault.open) = Gamma(24,0.5)
   $$
-- Gli step di attacco possono essere di tipo $AND$ o $OR$, $t(X.A) \in \{OR,AND\}$
+
+---
+
+# Formalism for Threat Modeling
+## Tipi di step di attacco e tempo di attacco globale
+
+- Gli step di attacco possono essere di tipo $AND$ o $OR$
+  $$
+    t(X.A) \in \{OR,AND\}
+  $$
   - $OR$ significa che l'attaccante può iniziare lo step di attacco se almeno uno dei passaggi precedenti è stato completato.
   - $AND$ significa che l'attaccante può iniziare lo step di attacco solo se tutti i passaggi precedenti sono stati completati.
   - Per esempio, se $t(Vault.open)=AND$ e
-  $$
-    (myVault.compromise, myVault.open) \in E
-  $$
-  e
-  $$
-    (myVaultPhysicalLocation.access, myVault.open) \in E
-  $$
-  allora, per poter aprire la cassaforte, è necessario che l'attaccante sia riuscito a compromettere il sistema (ottenere la chiave della cassaforte) **e** ad accedere alla sua posizione fisica.
-::right::
+    $$
+      (myVault.compromise, myVault.open) \in E
+    $$
+    e
+    $$
+      (myVaultPhysicalLocation.access, myVault.open) \in E
+    $$
+    allora, per poter aprire la cassaforte, è necessario che l'attaccante sia riuscito a compromettere il sistema (ottenere la chiave della cassaforte) **e** ad accedere alla sua posizione fisica.
 - La distribuzione di probabilità del tempo totale richiesto per completare l'attacco è definita come
   $$
     \Phi(A) = P(T_{glob}(A)=t)
   $$
+
+---
+
+# Formalism for Threat Modeling
+## Difese
+
 - Oltre a definire gli step di attacco, le classi possono anche prevedere delle **difese** $D(X_i)$, che rappresentano le azioni che possono essere intraprese per prevenire l'attacco. Utilizziamo $X.D$ per indicare la difesa per l'oggetto nella classe $X$.
   - Una difesa può essere $TRUE$ o $FALSE$, $s(D) \in \{TRUE,FALSE\}$, che indica se la difesa è attiva o meno.
   - Ad esempio, $Vault.timeLocked$ può essere $TRUE$ o $FALSE$.
@@ -221,7 +224,7 @@ class Channel{
 # Il Meta Attack Language
 ## Ruoli di associazione
 
-`parties` è un ruolo di associazione, definito in un altro punto della specifica MAL.
+`parties` è un ruolo di associazione, definito nella specifica MAL.
 
 ```java
 associations {
@@ -247,13 +250,11 @@ abstractClass Machine {
   & compromise
     -> channels.transmit
 }
-class Hardware extends Machine { 
-
-}
+class Hardware extends Machine {}
 class Software extends Machine {
   & compromise
   -> channels.transmit, 
-     executors.connect,
+     executors.connect
 }
 ```
 
@@ -304,23 +305,18 @@ class Credentials {
 
 ---
 
-<style>
-  .slidev-layout {
-    font-size: 0.8rem !important;
-  }
-</style>
 # Esempio
 
 - Classe [astratta]: `Machine`
   - Specializzazioni: `Hardware` e `Software`
-    - Le macchine possono eseguire Software, ad esempio una workstation può eseguire un sistema operativo, che a sua volta può eseguire un'applicazione.
+    - Le macchine possono eseguire Software; ad esempio, una workstation può eseguire un sistema operativo, che a sua volta può eseguire un'applicazione.
 - Due o più macchine possono essere collegate da un `Channel`
   - Ad esempio, un software per browser web può essere collegato a un software server web tramite un canale https.
 - Classe: `Credentials`
   - Le istanze possono essere, ad esempio, nomi utente e password o chiavi private.
   - Le credenziali hanno destinazioni (`Machine`), per le quali fungono da autenticazione e possono essere memorizzate sulle macchine.
 
-```java {all} {maxHeight:'180px'}
+```java {all|1-12|14-21|23-26|28-40|all} {maxHeight:'180px'}
 abstractClass Machine { 
   | connect
     -> compromise 
@@ -389,7 +385,7 @@ abstractClass Machine {
 }
 ```
 
-Considerando gli step di attacco, la classe `Machine` ha due quattro di attacco:
+Considerando gli step di attacco, la classe `Machine` ha due dei quattro step di attacco:
 - `compromise` indica che l'attaccante ha ottenuto il controllo della macchina
   - Per raggiungere `compromise`, sia `connect` che `authenticate` devono essere compromessi
 - `connect` rappresenta lo stabilimento di una connessione con la `Machine` da parte dell'attaccante
@@ -427,13 +423,13 @@ class Channel {
 }
 ```
 
-La classe `Channel` ha un solo step di attacco: `transmit`. Se `transmit` viene compromesso, allora tutte le `Machine` coinvolte nella comunicazione (`parties`) saranno compromesse.
+La classe `Channel` ha un solo step di attacco, `transmit`. Se `transmit` viene compromesso, allora tutte le `Machine` coinvolte nella comunicazione (`parties`) saranno compromesse.
 
 ---
 
 # Esempio (cont.)
 
-```java {all|11-12}
+```java {all|11-12|all}
 class Credentials {
   | access
     -> compromiseUnencrypted,
@@ -477,7 +473,7 @@ class Credentials {
 
 Tuttavia, c'è un'altra possibilità: l'attacco a dizionario (`dictionaryCrack`).
 
-Questo attacco richiede che venga speso del *tempo* per essere portato a termine. Tale intervallo richiesto è modello tramite una distribuzione di probabilità, in questo caso una distribuzione *gamma*.
+Questo attacco richiede che venga speso del *tempo* per essere portato a termine. Tale intervallo richiesto è modello tramite una distribuzione di probabilità, in questo caso una *distribuzione gamma*.
 
 ---
 
@@ -497,7 +493,7 @@ Questo attacco richiede che venga speso del *tempo* per essere portato a termine
 
 Dalla specifica, possiamo istanziare, in maniera automatica, le classi Java corrispondenti.
 
-```java {all} {maxHeight: '330px'}
+```java {all|1-3,10-12|4|all} {maxHeight: '320px'}
 Hardware macBook = new Hardware();
 Software macOS = new Software();
 Software sshClient = new Software();
@@ -524,14 +520,69 @@ Attacker attacker = new Attacker();
 attacker.addAttackPoint(macBook.compromise);
 ```
 
-<!--
-In questo piccolo esempio, si presume che l'attaccante abbia compromesso il sistema operativo macOS di un macBook, forse accedendo localmente mentre la macchina era incustodita. Un sshClient è in esecuzione sul Mac. La regola MAL `Machine.compromise -> executees.compromise` implica che la compromissione di macOS porta direttamente alla compromissione di sshClient. Inoltre, `Machine.compromise -> `storedCreds.access` porta l'attaccante ad accedere alle chiavi SSH sul Mac.
+<!-- In questo piccolo esempio, si presume che l'attaccante abbia compromesso il sistema operativo macOS di un macBook, forse accedendo localmente mentre la macchina era incustodita. Un sshClient è in esecuzione sul Mac. La regola MAL `Machine.compromise -> executees.compromise` implica che la compromissione di macOS porta direttamente alla compromissione di sshClient. Inoltre, `Machine.compromise -> storedCreds.access` porta l'attaccante ad accedere alle chiavi SSH sul Mac.
 
-L'accesso, tuttavia, non è sufficiente, poiché le chiavi SSH possono essere crittografate con una passphrase. La probabilità che le chiavi SSH siano effettivamente crittografate è impostata al 50% nell'istanza dell'oggetto sshKey, `Credentials sshKey = new Credentials (encrypted=Bernoulli(0.5))`; 
+L'accesso, tuttavia, non è sufficiente, poiché le chiavi SSH possono essere crittografate con una passphrase. La probabilità che le chiavi SSH siano effettivamente crittografate è impostata al 50% nell'istanza dell'oggetto `sshKey`, `Credentials sshKey = new Credentials (encrypted=Bernoulli(0.5))`; 
 
-Se sshKey non è crittografato, l'accesso sarà effettivamente sufficiente per compromettere le chiavi. In caso contrario, l'attaccante dovrà eseguire un attacco a dizionario sulle chiavi, che richiederà del tempo, come indicato da `dictionaryCrack [GammaDistribution(1.5, 15)]`.
-Compromettendo sshClient, le regole `Machine.compromise -> channels.transmit` e `Channel.transmit -> parties.connect` consente all'attaccante di connettersi a `sshDaemon.connect`, tuttavia, porterà alla compromissione solo se si raggiunge anche `autenticate`.
+Se `sshKey` non è crittografato, l'accesso sarà effettivamente sufficiente per compromettere le chiavi. In caso contrario, l'attaccante dovrà eseguire un attacco a dizionario sulle chiavi, che richiederà del tempo, come indicato da `dictionaryCrack [GammaDistribution(1.5, 15)]`.
+Compromettendo `sshClient`, le regole `Machine.compromise -> channels.transmit` e `Channel.transmit -> parties.connect` consentono all'attaccante di connettersi a `sshDaemon.connect`, tuttavia, porterà alla compromissione solo se si raggiunge anche `authenticate`.
 Se l'attaccante è riuscito a compromettere la passphrase della chiave SSH, la regola `Credentials.compromise -> target.autenticate` porterà a tale compromissione di sshDaemon. Ciò, a sua volta, consente all'aggressore di connettersi al sistema operativo ubuntu16 sottostante, che viene immediatamente compromesso, poiché le chiavi sono state specificate per fornire l'accesso non solo a sshDaemon ma anche al sistema operativo.
 
-In questo esempio, ci sono solo due distribuzioni stocastiche, la prima che rappresenta la probabilità che la passphrase sia crittografata e la seconda che rappresenta il tempo necessario per decifrare la passphrase nel caso in cui sia effettivamente crittografata. Nessun altro passaggio di attacco in questo esempio dovrebbe richiedere un tempo significativo. Adottando il presupposto di un aggressore perfettamente razionale, possiamo determinare il tempo globale per compromettere, ad esempio, `ubuntu16.compromise` calcolando il percorso più breve dall'attaccante a quella fase di attacco. Nella distribuzione risultante, metà della massa di probabilità sarà localizzata al tempo zero (perché nella metà degli attacchi la passphrase sarà in chiaro, quindi l'accesso sarà immediato), mentre la restante metà sarà distribuita secondo la distribuzione di probabilità del tempo locale al compromesso del `dictionaryCrack`. Questo piccolo modello può essere calcolato manualmente per produrre la distribuzione globale descritta del tempo di compromissione di `ubuntu16.compromise`, ma per modelli più grandi, i calcoli devono essere automatizzati.
--->
+In questo esempio, ci sono solo due distribuzioni stocastiche, la prima che rappresenta la probabilità che la passphrase sia crittografata e la seconda che rappresenta il tempo necessario per decifrare la passphrase nel caso in cui sia effettivamente crittografata. Nessun altro passaggio di attacco in questo esempio dovrebbe richiedere un tempo significativo. Adottando il presupposto di un aggressore perfettamente razionale, possiamo determinare il tempo globale per compromettere, ad esempio, `ubuntu16.compromise` calcolando il percorso più breve dall'attaccante a quella fase di attacco. Nella distribuzione risultante, metà della massa di probabilità sarà localizzata al tempo zero (perché nella metà degli attacchi la passphrase sarà in chiaro, quindi l'accesso sarà immediato), mentre la restante metà sarà distribuita secondo la distribuzione di probabilità del tempo locale al compromesso del `dictionaryCrack`. Questo piccolo modello può essere calcolato manualmente per produrre la distribuzione globale descritta del tempo di compromissione di `ubuntu16.compromise`, ma per modelli più grandi, i calcoli devono essere automatizzati. -->
+
+---
+
+# Automatic Code Generation
+
+Gli autori hanno implementato un generatore di codice Java utilizzando il framework ANTLR.
+
+## Esempio
+
+```java {all} {maxHeight: '120px'}
+class Channel {
+  | transmit
+    -> parties. connect
+}
+associations {
+  Machine [parties] 2-* <-- Communication --> * [channels] Channel
+}
+```
+
+si traduce in
+
+```java {all} {maxHeight: '160px'}
+public class Channel {
+  public AnySet<Machine> parties = new AnySet<>();
+  transmit = new Transmit(...);
+  ...
+  public class Transmit extends AttackStepMin { 
+    ...
+    @Override
+    protected void setExpectedParents() {
+      for(Machine machine: parties) {
+        addExpectedParent(machine.compromise);
+      }
+    }
+
+    @Override
+    public void updateChildren(Set<AttackStep> activeAttackSteps) {
+      for(Machine machine: parties) {
+        machine.connect.updateTtc(this, ttc, activeAttackSteps);
+      }
+    }
+
+    @Override
+    public double localTtc() {
+      return ttcHashMap.get("channel.transmit"); 
+    }
+  }
+
+  public void addParties(Machine machine) {
+    this.parties.add(machine);
+    machine.channels.add(this);
+  }
+  ...
+}
+```
+
+<!-- I metodi `setExpectedParents()`  e `updateChildren()` creano le relazioni tra gli step di attacco, a livello di classi. Il modello a livello di oggetti si ottiene (ovviamente) istanziando le classi in oggetti e collegando ciascun oggetto agli altri attraverso i metodi autogenerati, come `Channel.addParties()`.-->
