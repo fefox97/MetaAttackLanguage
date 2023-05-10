@@ -15,7 +15,11 @@ css: unocss
 title: MAL
 monaco: true
 # canvasWidth: 1920
-
+addons:
+  - slidev-component-progress
+  - slidev-component-zoom
+  - slidev-addon-components
+  - slidev-component-spotlight
 ---
 
 # Pitch
@@ -31,6 +35,14 @@ monaco: true
     <carbon:edit />
   </button>
 </div> -->
+
+---
+
+# Target
+
+<div class="slidev-layout place-content-center" mt--5>
+  <img src="/Target.png" w-180 rd-5>
+</div>
 
 ---
 layout: section
@@ -586,3 +598,288 @@ public class Channel {
 ```
 
 <!-- I metodi `setExpectedParents()`  e `updateChildren()` creano le relazioni tra gli step di attacco, a livello di classi. Il modello a livello di oggetti si ottiene (ovviamente) istanziando le classi in oggetti e collegando ciascun oggetto agli altri attraverso i metodi autogenerati, come `Channel.addParties()`.-->
+
+---
+layout: section
+---
+
+# MAL
+## Stato dell'arte
+
+---
+layout: full
+---
+# Evoluzione di MAL
+
+<div position-relative top--35 style="transform:scaleY(0.69) scaleX(0.9)">
+
+```mermaid
+timeline
+  2016 : pwnPr3d<br> An Attack-Graph-Driven Probabilistic Threat-Modeling Approach
+  2018: A Meta Language for Threat Modeling and Attack Simulations
+  2019: Probabilistic Modeling and Simulation of Vehicular Cyber Attacks - An Application of the Meta Attack Language
+      : Validating the Meta Attack Language using MITRE ATT&CK matrix
+      : Creating Meta Attack Language Instances using ArchiMate - Applied to Electric Power and Energy System Cases
+  2020: An Attack Simulation Language for the IT Domain
+  2021: Towards Automated Attack Simulations of BPMN-based Processes
+  2022: VehicleLang - A probabilistic modeling and simulation language for modern vehicle IT infrastructures
+      : Towards a Systematic Method for Developing Meta Attack Language Instances
+      : Analyzing Enterprise Architecture Models by Means of the Meta Attack Language
+      : Security Countermeasures Selection Using the Meta Attack Language and Probabilistic Attack Graphs
+      : Automating security processing of Integration flows - Automating input processing for Attack Simulations using Meta Attack Language and Common Vulnerability and Exposures
+      : StrideLang - Creation of a Domain-Specific Threat Modeling Language using STRIDE, DREAD and MAL
+  2023: A threat modeling language for generating attack graphs of substation automation systems
+```
+</div>
+
+---
+layout: two-cols
+---
+
+# pwnPr3d
+
+- Il paper presenta pwnPr3d, un sistema di threat modeling basato sulla modellazione della rete, che fornisce un approccio olistico alla sicurezza informatica ed è in grado di generare automaticamente grafi di attacco, con distribuzioni di probabilità sul Time To Compromise (TTC) degli asset del sistema.
+- <u>Si tratta di un precursore di MAL.</u>
+- pwnPr3d ha un'architettura di meta-modellazione chiusa, che promuove la riutilizzabilità degli elementi del modello e la personalizzazione delle esigenze specifiche.
+- Il paper definisce i grafi di attacco, il calcolo del TTC e presenta esempi di modellazione. La lingua di modellizzazione è flessibile e può essere personalizzata per soddisfare esigenze specifiche.
+- pwnPr3d copre la maggior parte della classificazione STRIDE tranne la repudiation, attualmente in fase di sviluppo.
+
+::right::
+
+<img src="/immagini/pwnPr3d.png" w-100 rd-2>
+
+
+---
+layout: two-cols
+---
+
+# VehicleLang
+
+- Costruito su MAL e coreLang, VehicleLang è un linguaggio di modellazione e simulazione probabilistico per le infrastrutture IT dei veicoli moderni.
+- Sono stati aggiunti nuovi elementi per modellare le caratteristiche specifiche dei veicoli:
+  - I componenti di rete CAN
+  - Le comunicazioni wireless
+  - ECU (Electronic Control Unit)
+  - LIN (Local Interconnect Network)
+  - FlexRay
+- Di questo paper ho letto anche una versione più aggiornata, che non aggiungeva nulla di nuovo rispetto a quanto già visto.
+
+::right::
+<img src="/immagini/VehicleLang.png" w-100 rd-2>
+
+---
+layout: two-cols
+---
+
+# attackLang
+
+- Si tratta di un linguaggio di modellazione e simulazione degli attacchi per il dominio IT, basandosi su MITRE ATT&CK.
+- È stata scelta una tecnica di attacco per ciascuna colonna del MITRE ATT&CK Matrix ed è stata implementata in attackLang.
+- Java e jUnit sono stati utilizzati per implementare il generatore di codice e Maven per la la compilazione e l'esecuzione dei test.
+
+::right::
+
+<figure>
+  <img src="/immagini/attackLang1.png" w-80>
+  <figcaption>Figura 1: MITRE ATT&CK Matrix extract</figcaption>
+</figure>
+<br>
+<figure>
+  <img src="/immagini/attackLang2.png" w-80>
+  <figcaption>Figura 2: Graphical meta model for attackLang</figcaption>
+</figure>
+
+---
+
+# attackLang (Cont.)
+
+## Attack graph [^1]
+
+<div flex flex-justify-center>
+    <figure class="padded-img">
+      <img src="/immagini/attackLang_AttackGraph1.png" w-80>
+      <figcaption>Figura 3: Attack graph of the individual spearphishingLink file</figcaption>
+    </figure>
+    <figure class="padded-img">
+      <img src="/immagini/attackLang_AttackGraph2.png" w-80>
+      <figcaption>Figura 4: Attack graph of the complete attackLang (Not all connections)</figcaption>
+    </figure>
+</div>
+
+
+[^1]: Non è stato specificato come ottenere questi attack graph a partire dal codice generato da attackLang.
+
+---
+layout: two-cols-header
+---
+
+# Creating Meta Attack Language Instances using ArchiMate
+
+::left::
+
+- Il paper presenta un metodo per creare istanze di MAL a partire da modelli ArchiMate.
+- Sono stati analizzati due casi d'uso:
+  - Un sistema di controllo di una centrale termoelettrica;
+  - La rete elettrica ucraiana.
+
+ArchiMate è un linguaggio di modellazione dell'architettura aziendale aperto e indipendente per supportare la descrizione, l'analisi e la visualizzazione dell'architettura all'interno e tra i domini aziendali in modo inequivocabile. ArchiMate si distingue da altri linguaggi come Unified Modeling Language (UML) e Business Process Modeling and Notation (BPMN) per il suo ambito di modellazione aziendale.
+
+Inoltre, UML e BPMN sono pensati per un uso specifico e sono piuttosto pesanti - contenenti circa 150 (UML) e 250 (BPMN) concetti di modellazione mentre ArchiMate funziona con poco meno di 50 (nella versione 2.0). L'obiettivo di ArchiMate è quello di essere " il più piccolo possibile", non di coprire ogni scenario marginale immaginabile.
+
+::right::
+
+<figure>
+  <img src="/immagini/archiMateToMAL.png" w-80>
+  <figcaption>Figura 5: Transformation process</figcaption>
+</figure>
+<br>
+<figure>
+  <img src="/immagini/archiMateTool.png" w-70>
+  <figcaption>Figura 6: ArchiMate Tool</figcaption>
+</figure>
+
+---
+title: Automated Attack Simulations of BPMN-based Processes
+layout: two-cols-header
+---
+
+# Automated Attack Simulations of BPMN-based Processes
+
+::left::
+
+- Il paper mostra le mancanze di BPMN dal punto di vista della sicurezza.
+  - Ad esempio, in Figura 7 è riportato un BPMN in cui ci sono diverse vulnerabilità, che non erano ovvie al momento della creazione del diagramma stesso.
+- Le soluzioni già esistenti, secondo gli autori, sono limitative, e.g.
+  - SecureBPMN [^1]
+  - SecBPMN [^2]
+- Come soluzione, viene proposto un mapping tra le entità di BPMN e quelle di coreLang, linguaggio basato su MAL che contiene tutti i concetti generali dell'IT. In sostanza vengono trasformati i processi concreti del BPMN in modelli di attacco, che possono essere simulati con tool come securiCAD [^3].
+
+::right::
+
+<figure>
+  <img src="/immagini/bpmn1.png" w-90>
+  <figcaption>Figura 7: Esempio di BPMN</figcaption>
+</figure>
+
+[^1]: SecureBPMN è un DSL che consente di modellare gli aspetti di sicurezza. Esso è definito come un meta-modello che può essere facilmente integrato in BPMN e, quindi, può essere utilizzato per modellare processi aziendali e sicuri e composizioni di servizi sicure.
+[^2]: SecBPMN è un'estensione di BPMN che consente di modellare gli aspetti di sicurezza. SecBPMN è definito come un meta-modello che può essere facilmente integrato in BPMN e, quindi, può essere utilizzato per modellare processi aziendali e composizioni di servizi sicure.
+[^3]: securiCAD è un tool per la simulazione di attacchi. Tuttavia, il sito web per potervi accedere è malconfigurato.
+---
+layout: two-cols-header
+---
+
+# Automated Attack Simulations of BPMN-based Processes (Cont.)
+
+::left::
+## BPMN2MAL
+
+- Per valutare l'approccio indicato, è stato implementato un prototipo di BPMN2MAL.
+- Il processo adottato è rappresentato in Figura 9. In sostanza non si lavora direttamente sul BPMN ma su un modello grafico generato a partire da esso.
+  - Viene generato un grafo a partire dal BPMN.
+  - Per ogni elemento all'interno del BPMN vengono generate diverse configurazioni, con le librerie e le versioni previste.
+  - Questo elenco viene utilizzato per effettuare una ricerca nel repository del NIST, per trovare le vulnerabilità associate.
+  - Le informazioni trovate vengono inserite nel grafo.
+  - I grafi vengono poi trasformati in modelli securiCAD, che sono istanze di coreLang, secondo i mapping mostrati in Figura 8.
+  - Per ciascun modello securiCAD vengono eseguiti diversi test di simulazione, fornendo all'attaccante diverse superfici di attacco.
+  - I risultati vengono poi restituiti nella rappresentazione grafica, per visualizzare le attività critiche nel modello BPMN.
+
+::right::
+<div flex flex-justify-center>
+<figure class="padded-img">
+  <img src="/immagini/bpmn2mal.png" h-60>
+  <figcaption>Figura 8: BPMN2MAL</figcaption>
+</figure>
+
+<figure class="padded-img">
+  <img src="/immagini/bpmn2malProto.png" h-60>
+  <figcaption>Figura 9: Prototipo dell'architettura</figcaption>
+</figure>
+</div>
+
+---
+
+# Security countermeasures selection using the Meta Attack Language and Probabilistic Attack Graphs
+
+1. **Introduzione**: Il paper presenta un metodo per selezionare contromisure di sicurezza efficienti nelle infrastrutture IT utilizzando il Meta Attack Language (MAL) e i grafi di attacco probabilistici.
+2. **Lavoro correlato**: Gli autori discutono gli approcci esistenti all'analisi del rischio e alla selezione delle contromisure di sicurezza, evidenziando l'importanza di avere un modello completo del sistema e metriche di sicurezza pertinenti.
+3. **Metodologia**: Gli autori descrivono il loro approccio, che prevede la modellizzazione dell'infrastruttura IT utilizzando MAL e la generazione di grafi di attacco probabilistici per identificare vulnerabilità e possibili percorsi di attacco.
+4. **Validazione empirica**: Gli autori forniscono i risultati degli esperimenti condotti su varie infrastrutture IT per dimostrare l'efficacia del loro approccio nella selezione di contromisure di sicurezza efficienti.
+5. **Conclusioni**: Gli autori concludono che il loro metodo può aiutare le organizzazioni a proteggere gli asset critici delle infrastrutture da potenziali attacchi informatici identificando vulnerabilità e suggerendo le appropriate contromisure.
+
+**Complessivamente, questo paper fornisce spunti su come le organizzazioni possano utilizzare MAL e i grafi di attacco probabilistici per migliorare la propria posizione in materia di sicurezza informatica.**
+
+---
+
+
+# Automating input processing for Attack Simulations using Meta Attack Language and Common Vulnerability and Exposures
+
+- Si tratta di un estensione del lavoro presentato in <Link to="35" title="Automated Attack Simulations of BPMN-based Processes"/> 
+- Lo scopo della tesi è quello di automatizzare un'attività precedentemente manuale costruendo sul lavoro precedente svolto nel progetto.
+- Una rappresentazione coreLang MAL di un sistema viene istanziata, creando un mapping dai punti di attacco utilizzando l'input dell'integration flow[^1] e collegandoli a vulnerabilità ed exploit rilevanti, raccolti dal crawler NVD già presente. Questa mappatura deve essere utilizzata come input per le simulazioni di attacco eseguite in securiCAD.
+
+## securiCAD
+
+- Il modo in cui securiCAD genera i suoi grafici di attacco è attraverso una libreria di passaggi di attacco fissa e un DSL chiamato **securiLang**.
+- Le simulazioni di attacco in securiCAD si basano su simulazioni probabilistiche su grafici di attacco simili alle reti bayesiane, in combinazione con la ricerca sulla sicurezza.
+- Per ogni risorsa del modello per il quale vengono simulati gli attacchi, il tempo medio in cui l'attività deve essere compromessa a un certo tipo di attacco è determinato in base a quali misure difensive sono state messe in atto per la particolare risorsa. <u>È lo stesso principio di base di MAL!</u>
+
+[^1]: Per integration flow si intende un modello BPMN-based che mostra come le diverse parti di un business interagiscono tra loro.
+
+<style>
+  h1{
+    font-size: 16pt !important;
+    line-height: 1.5em !important;
+  }
+  h2{
+    font-size: 14pt !important;
+    line-height: 1.5em !important;
+  }
+</style>
+
+---
+
+# StrideLang: Creation of a Domain-Specific Threat Modeling Language using STRIDE, DREAD and MAL
+
+- Il lavoro di tesi è volto a realizzare un nuovo DSL per il threat modeling, chiamato **StrideLang**.
+- È intuibile che questo linguaggio sia basato su STRIDE.
+- Più precisamente, strideLang è stato costruito andando a mappare i concetti di STRIDE su coreLang, un DSL basato su MAL per la descrizione del dominio IT.
+- In strideLang sono presenti sei asset, relativi alle sei categorie di STRIDE; ciascuna di esse può contenere fino a tre attack step, ciascuno dei quali corrisponde a una categoria di rischio DREAD (low, medium, high).
+
+```json
+asset Spoofing
+user info : ”In this type of attacks the perpetrator appears as someone that can be trusted ”
+{
+  | highRiskSpoofing −>
+    credentials.attemptCredentialsReuse
+  | mediumRiskSpoofing −> identity.assume,
+    application.specificAccessAuthenticate,
+    application.authenticate,
+    networks.accessNetworkData //manInTheMiddle
+}
+```
+
+---
+
+# sasLang
+
+- Il paper presenta un nuovo DSL per la descrizione di un substation automation system [^1], chiamato **sasLang**.
+- Questo DSL è stato costruito basandosi su coreLang e icsLang, un DSL per la descrizione di sistemi di controllo industriale.
+- Il criterio adottato è il seguente:
+  - Caso 1: L'asset esiste in icsLang o coreLang $\rightarrow$ Nessun nuovo asset viene aggiunto a sasLang.
+  - Caso 2: L'asset è un tipo di asset descritto in icsLang o coreLang $\rightarrow$ Estendi l'asset generico icsLang per creare un nuovo asset specifico in sasLang.
+  - Caso 3: L'asset non esiste in icsLang o coreLang $\rightarrow$ Crea un nuovo asset e le relative associazioni dell'asset in sasLang.
+
+## Esempio
+
+```json
+asset LogicalNode extends IcsApplication
+{
+  | manipulationOfControl
+    +>  equipment.manipulationOfControl,
+        actuator.manipulate
+}
+```
+
+Il simbolo `+>` indica che il nuovo step di attacco non sovrascrive il vecchio.
+
+[^1]: Un substation automation system è un sistema di controllo che monitora e controlla le apparecchiature elettriche in una stazione elettrica.
