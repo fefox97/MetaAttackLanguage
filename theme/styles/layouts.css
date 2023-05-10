@@ -12,7 +12,7 @@
   } */
 
   p + h2, ul + h2, table + h2 {
-    @apply mt-5;
+    @apply mt-2;
   }
   
   h1 {
@@ -20,7 +20,7 @@
   }
 
   h2 {
-    @apply text-3xl;
+    @apply text-2xl;
   }
 
   h3 {

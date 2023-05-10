@@ -9,17 +9,16 @@
 } */
 
 .slidev-layout{ 
-    @apply text-3.3;
-
     p {
-        @apply mb-2 mt-3;
+        @apply mb-2 mt-3 text-3.3;
         line-height: 1.5;
+        text-align: justify
     }
-
-    /* li{
-        @apply mt-2 mb-2;
-        line-height: 15pt;
-    } */
+    
+    li{
+        @apply text-3.3;
+        line-height: 1.5 !important;
+    }
 }
 
 .col-left, .col-right{
@@ -27,16 +26,37 @@
 }
 
 .footnotes-sep {
-    @apply mt-30 opacity-10;
+    @apply absolute left-13 right-23 top-120 opacity-10;
+}
+.footnotes-list {
+    @apply absolute top-120 left-13 right-23;
+    height: 30pt;
+    overflow-y: scroll;
 }
 .footnotes {
     p, li{
-        @apply text-2.5 opacity-75;
+        @apply text-2.5 opacity-75 ml-3;
+    }
+    p{
+        @apply ml-1;
+    }
+    li{
+        @apply mb--2;
     }
 }
 /* .footnote-backref {
     display: none;
 } */
+
+img{
+    @apply ma;
+}
+.padded-img{
+    padding: 0 10px;
+}
+figcaption {
+    @apply text-2.5 opacity-85 text-center;
+}
 
 .color-info {
     color: var(--color-info);

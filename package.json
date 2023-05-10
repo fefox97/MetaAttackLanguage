@@ -7,13 +7,17 @@
     "export": "slidev export"
   },
   "dependencies": {
-    "@slidev/cli": "^0.40.6",
-    "@slidev/theme-default": "*",
-    "@slidev/theme-seriph": "*",
-    "slidev-theme-smile": "^0.8.1"
+    "@slidev/cli": "^0.40.16",
+    "@slidev/theme-default": "^0.21.2",
+    "@slidev/theme-seriph": "^0.21.3",
+    "slidev-addon-components": "^0.0.1",
+    "slidev-component-progress": "^1.0.3",
+    "slidev-component-spotlight": "^1.0.3",
+    "slidev-component-zoom": "^1.0.2",
+    "slidev-theme-smile": "^0.8.2"
   },
   "devDependencies": {
     "@iconify-json/typcn": "^1.1.4",
-    "playwright-chromium": "^1.32.2"
+    "playwright-chromium": "^1.33.0"
   }
 }
