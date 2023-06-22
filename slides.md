@@ -847,11 +847,12 @@ layout: two-cols-header
 
 ```json
 asset Spoofing
-user info : ”In this type of attacks the perpetrator appears as someone that can be trusted ”
+user info : ”In this type of attacks the perpetrator appears as someone that can be trusted”
 {
   | highRiskSpoofing −>
     credentials.attemptCredentialsReuse
-  | mediumRiskSpoofing −> identity.assume,
+  | mediumRiskSpoofing −>
+    identity.assume,
     application.specificAccessAuthenticate,
     application.authenticate,
     networks.accessNetworkData //manInTheMiddle
@@ -862,7 +863,7 @@ user info : ”In this type of attacks the perpetrator appears as someone that c
 
 # sasLang
 
-- Il paper presenta un nuovo DSL per la descrizione di un substation automation system [^1], chiamato **sasLang**.
+- Il paper presenta un nuovo DSL per la descrizione di un *substation automation system* [^1], chiamato **sasLang**.
 - Questo DSL è stato costruito basandosi su coreLang e icsLang, un DSL per la descrizione di sistemi di controllo industriale.
 - Il criterio adottato è il seguente:
   - Caso 1: L'asset esiste in icsLang o coreLang $\rightarrow$ Nessun nuovo asset viene aggiunto a sasLang.
