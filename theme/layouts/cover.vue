@@ -22,7 +22,7 @@ const style = computed(() => handleBackground(props.background, true))
 
 <template>
     <div class="slidev-layout cover text-center" :style="style">
-        <img src="/logo.svg" h-15 right-10 fixed c-white>
+        <!-- <img src="/logo.svg" h-15 right-10 fixed c-white> -->
         <div class="my-auto w-full">
             <slot />
         </div>

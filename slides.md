@@ -41,7 +41,7 @@ addons:
 # Target
 
 <div class="slidev-layout place-content-center" mt--5>
-  <img src="/Target.png" w-180 rd-5>
+  <img src="/immagini/TesiTarget.png" w-180>
 </div>
 
 ---
@@ -106,7 +106,7 @@ Questi linguaggi permettono di modellare le proprietà di sicurezza di un sistem
     \lambda = (x_i,x_j)
   $$
   - Ad esempio, $antwerpVault$ potrebbe avere un link $containment$ con $cullinanDiamond$, che rappresenta il fatto che la cassaforte può contenere il diamante.
-- I link sono divisi in set di **associazioni** $\Lambda = \{\Lambda_1,...,\Lambda_n\}$, che collega una classe all'altra, e.g.
+- I link sono divisi in set di **associazioni** $\Lambda = \{\Lambda_1,...,\Lambda_n\}$, che collegano una classe all'altra, e.g.
   $$
     x_i,x_k \in X_m, x_j, x_l \in X_n | \lambda_1=(x_i,x_j) \in \Lambda, \lambda_2=(x_k,x_l) \in \Lambda
   $$
@@ -143,7 +143,7 @@ sta a significare che se si riesce ad aprire la cassaforte, si possono rubare i 
 
 - Una classe obbligatoria è il singleton **Attacker**, $\Xi \in X$, contenente un singolo step di attacco $\Xi.\xi$, il quale rappresenta il punto di partenza dell'attacco sul modello del sistema.
 - Per ciascuno step di attacco $A(X_i)$, è definito un **tempo di attacco locale** (stimato) $\phi(A) = P(T_{loc}(A)=t)$.
-  - Per esempio, il tempo di attacco locale per aprire la cassaforte potrebbe essere specificato da una distribuzione Gamma, con media 12 e deviazione standard di 6 ore,
+  - Per esempio, il tempo di attacco locale per aprire la cassaforte potrebbe essere specificato da una distribuzione Gamma, con media 12 e deviazione standard di 6 ore.
   $$
     \phi(antwerpVault.open) = Gamma(24,0.5)
   $$
@@ -188,14 +188,51 @@ sta a significare che se si riesce ad aprire la cassaforte, si possono rubare i 
   che significa che se la cassaforte è bloccata per un certo periodo di tempo ($Vault.timeLocked = TRUE$), allora non è possibile aprire la cassaforte.
 
 ---
+layout: two-cols
+---
+
+# Global time to compromise
+
+Per il calcolo del tempo globale di attacco è stata implementata una versione modificata dell'algoritmo di Dijkstra, che tiene conto delle distribuzioni di probabilità per i tempi di attacco locali e per la scelta del prossimo step di attacco.
+
+Se si utilizzasse il solo algoritmo di Dijkstra, staremmo considerando solo i nodi corrispondenti a delle `OR`: Dijkstra calcola il percorso minimo tra due nodi; dunque, ad ogni passo si sceglie il peso minimo, mediante una funzione `MIN`.
+
+$$
+  T_{glob}(A_{child}) = \min({T_{glob}(A_{parent_1}, \ldots, T_{glob}(A_{parent_n})}) + T_{loc}(A_{child})
+$$
+
+dove il collegamento tra i nodi è di tipo `OR`, $t(A_{child}) = OR$.
+
+Volendo considerare anche i nodi con collegamento `AND`, dovremmo effettuare una somma dei pesi dei tempi globali dei nodi genitori:
+
+$$
+  T_{glob}(A_{child}) = \sum_{i=1}^n T_{glob}(A_{parent_i}) + T_{loc}(A_{child})
+$$
+
+:: right ::
+
+Per semplificare il calcolo, questa somma è stata sostituita con una funzione `MAX`:
+
+$$
+  T_{glob}(A_{child}) \approx \max({T_{glob}(A_{parent_1}, \ldots, T_{glob}(A_{parent_n})}) + T_{loc}(A_{child})
+$$
+
+dove il collegamento tra i nodi è di tipo `AND`, $t(A_{child}) = AND$.
+
+<img src="/immagini/TempoGlobaleDiCompromissione.png" w-80>
+
+
+---
 
 # Global time to compromise
 
 Il calcolo del tempo globale per compromettere il sistema non solo tiene conto dei tempi locali per ciascuno step di attacco, ma anche dell'ordine di esecuzione degli step di attacco stessi.
 
-Ad esempio, un attaccante con scarse capacità di pianificazione potrebbe essere modellato attraverso una "random walk" sul grafo degli step di attacco. In tal caso, la distribuzione di probabilità per la scelta del prossimo step di attacco è uniforme.
+Ad esempio, un attaccante con scarse capacità di pianificazione potrebbe essere modellato attraverso una "**random walk**" sul grafo degli step di attacco. In tal caso, la distribuzione di probabilità per la scelta del prossimo step di attacco è uniforme.
 
 Un attaccante esperto, invece, sceglie sempre il **percorso minimo** per raggiungere lo step di attacco successivo.
+
+<img src="/immagini/PathFinding.png" w-100>
 
 ---
 layout: center
@@ -328,7 +365,7 @@ class Credentials {
   - Le istanze possono essere, ad esempio, nomi utente e password o chiavi private.
   - Le credenziali hanno destinazioni (`Machine`), per le quali fungono da autenticazione e possono essere memorizzate sulle macchine.
 
-```java {all|1-12|14-21|23-26|28-40|all} {maxHeight:'180px'}
+```java {all|1-12|14-21|23-26|28-40|all} {maxHeight:'210px'}
 abstractClass Machine { 
   | connect
     -> compromise 
@@ -485,7 +522,7 @@ class Credentials {
 
 Tuttavia, c'è un'altra possibilità: l'attacco a dizionario (`dictionaryCrack`).
 
-Questo attacco richiede che venga speso del *tempo* per essere portato a termine. Tale intervallo richiesto è modello tramite una distribuzione di probabilità, in questo caso una *distribuzione gamma*.
+Questo attacco richiede che venga speso del *tempo* per essere portato a termine. Tale intervallo richiesto è modellato tramite una distribuzione di probabilità, in questo caso una *distribuzione gamma*.
 
 ---
 
@@ -543,6 +580,8 @@ Se l'attaccante è riuscito a compromettere la passphrase della chiave SSH, la r
 In questo esempio, ci sono solo due distribuzioni stocastiche, la prima che rappresenta la probabilità che la passphrase sia crittografata e la seconda che rappresenta il tempo necessario per decifrare la passphrase nel caso in cui sia effettivamente crittografata. Nessun altro passaggio di attacco in questo esempio dovrebbe richiedere un tempo significativo. Adottando il presupposto di un aggressore perfettamente razionale, possiamo determinare il tempo globale per compromettere, ad esempio, `ubuntu16.compromise` calcolando il percorso più breve dall'attaccante a quella fase di attacco. Nella distribuzione risultante, metà della massa di probabilità sarà localizzata al tempo zero (perché nella metà degli attacchi la passphrase sarà in chiaro, quindi l'accesso sarà immediato), mentre la restante metà sarà distribuita secondo la distribuzione di probabilità del tempo locale al compromesso del `dictionaryCrack`. Questo piccolo modello può essere calcolato manualmente per produrre la distribuzione globale descritta del tempo di compromissione di `ubuntu16.compromise`, ma per modelli più grandi, i calcoli devono essere automatizzati. -->
 
 ---
+disabled: true
+---
 
 # Automatic Code Generation
 
@@ -553,7 +592,7 @@ Gli autori hanno implementato un generatore di codice Java utilizzando il framew
 ```java {all} {maxHeight: '120px'}
 class Channel {
   | transmit
-    -> parties. connect
+    -> parties.connect
 }
 associations {
   Machine [parties] 2-* <-- Communication --> * [channels] Channel
@@ -675,7 +714,7 @@ layout: two-cols
 
 - Si tratta di un linguaggio di modellazione e simulazione degli attacchi per il dominio IT, basandosi su MITRE ATT&CK.
 - È stata scelta una tecnica di attacco per ciascuna colonna del MITRE ATT&CK Matrix ed è stata implementata in attackLang.
-- Java e jUnit sono stati utilizzati per implementare il generatore di codice e Maven per la la compilazione e l'esecuzione dei test.
+- Java e jUnit sono stati utilizzati per implementare il generatore di codice e Maven per la compilazione e l'esecuzione dei test.
 
 ::right::
 
@@ -724,7 +763,7 @@ layout: two-cols-header
 
 ArchiMate è un linguaggio di modellazione dell'architettura aziendale aperto e indipendente per supportare la descrizione, l'analisi e la visualizzazione dell'architettura all'interno e tra i domini aziendali in modo inequivocabile. ArchiMate si distingue da altri linguaggi come Unified Modeling Language (UML) e Business Process Modeling and Notation (BPMN) per il suo ambito di modellazione aziendale.
 
-Inoltre, UML e BPMN sono pensati per un uso specifico e sono piuttosto pesanti - contenenti circa 150 (UML) e 250 (BPMN) concetti di modellazione mentre ArchiMate funziona con poco meno di 50 (nella versione 2.0). L'obiettivo di ArchiMate è quello di essere " il più piccolo possibile", non di coprire ogni scenario marginale immaginabile.
+Inoltre, UML e BPMN sono pensati per un uso specifico e sono piuttosto pesanti - contenenti circa 150 (UML) e 250 (BPMN) concetti di modellazione mentre ArchiMate funziona con poco meno di 50 (nella versione 2.0). L'obiettivo di ArchiMate è quello di essere "il più piccolo possibile", non di coprire ogni scenario marginale immaginabile.
 
 ::right::
 
